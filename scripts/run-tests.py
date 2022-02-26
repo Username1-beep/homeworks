@@ -7,23 +7,21 @@ from utils import *
 init()
 
 
-DEFAULT_ONE_TEST_TIMEOUT_S = 0.5
+DEFAULT_ONE_TEST_TIMEOUT_S = 0.75
 
 
 parser = argparse.ArgumentParser(description='Run tests')
-parser.add_argument('--type', '-t', default='public', choices=['public', 'private'], dest='tp', help='Choose which tests run')
 parser.add_argument('--config', '-c', default='Debug', choices=['Debug', 'Release', 'RelWithDebInfo'], dest='config', help='Specify build type')
 parser.add_argument('--filter', '-f', default=None, dest='filter', help='Specify gtest filter for tests')
 parser.add_argument('--drop-build', '-d', action='store_true', dest='drop', help='Force drop build results')
 parser.add_argument('--timeout', '-s', type=float, default=DEFAULT_ONE_TEST_TIMEOUT_S, dest='timeout_s', help='Timeout for each test in seconds')
 
 args = parser.parse_args()
-tp = args.tp
 config = args.config
 timeout_s = args.timeout_s
 
 build_folder = get_cwd() + '/cmake-build-' + config
-test_file = build_folder + '/' + tp + '-tests'
+test_file = build_folder + '/tests'
 
 call_with_output(['python3', 'scripts/build.py', '-c', config] + (['-d'] if args.drop else []))
 
@@ -39,10 +37,10 @@ print('\n\n', end='')
 
 test_log_file = build_folder + '/' + config + '-tests-log.json'
 test_args += ['--gtest_output=json:' + test_log_file]
-max_execution_time_s = (max(1.0, tests_count * timeout_s) if config == 'Release' else 1000000.0)
+max_execution_time_s = (max(DEFAULT_ONE_TEST_TIMEOUT_S, tests_count * timeout_s) if config == 'Release' else 1000000.0)
 try:
     cprint('Run ', 'yellow')
-    cprint(str(tests_count) + ' ' + tp, 'magenta')
+    cprint(str(tests_count), 'magenta')
     cprint(' tests in ', 'yellow')
     cprint(config, 'magenta')
     cprint(' config', 'yellow')

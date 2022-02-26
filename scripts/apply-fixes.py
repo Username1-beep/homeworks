@@ -7,10 +7,10 @@ init()
 
 
 parser = argparse.ArgumentParser(description='Apply fixes')
-parser.add_argument('-n', default=10000, type=int, dest='fixes_count', help='Number of fixes to apply')
+parser.add_argument('-c', '--check-only', action='store_true', dest='check_only', help='Use to only check is application necessary')
 parser.add_argument('--on-github', action='store_true', dest='on_github', help='Use to vary behavior on github')
 cmd_args = parser.parse_args()
-fixes_count = cmd_args.fixes_count
+check_only = cmd_args.check_only
 on_github = cmd_args.on_github
 
 
@@ -63,6 +63,36 @@ assert os.path.exists(cur_fix_dir)
 repo_name = os.path.basename(cur_fix_dir)
 ok(repo_name)
 
+
+def get_version(repo_path):
+    with open(repo_path + '/scripts/.version', 'r') as inp:
+        version = inp.readline().rstrip()
+        assert len(version) > 0
+        return version
+
+
+log('Check are there non-applied fixes')
+if get_version(get_cwd()) == get_version(cur_fix_dir):
+    ok('Current version is ' + str(get_version(get_cwd())))
+    exit(0)
+
+print('')
+
+if check_only:
+    termcolor.cprint('ERROR!!! Deprecated version!!!', color='red', attrs=['bold', 'blink'], end='')
+    termcolor.cprint('Local (your) version is ', color='white', attrs=['bold'], end='')
+    termcolor.cprint(get_version(get_cwd()), color='magenta', attrs=['bold'], end='')
+    termcolor.cprint('  Remote (@burakov28) version is ', color='white', attrs=['bold'], end='')
+    termcolor.cprint(get_version(cur_fix_dir), color='magenta', attrs=['bold'])
+    termcolor.cprint('To fix that run ', color='white', attrs=['bold'], end='')
+    termcolor.cprint('python3 scripts/apply-fixes.py', color='green', attrs=['bold'])
+    exit(1)
+
+
+termcolor.cprint('Local (your) version is ', color='white', attrs=['bold'], end='')
+termcolor.cprint(get_version(get_cwd()), color='magenta', attrs=['bold'], end='')
+termcolor.cprint('  Remote (@burakov28) version is ', color='white', attrs=['bold'], end='')
+termcolor.cprint(get_version(cur_fix_dir), color='magenta', attrs=['bold'])
 
 log('Apply fix ' + repo_name)
 res = subprocess.run(['cp', '-vrf', cur_fix_dir + '/.', get_cwd() + '/'], capture_output=True, cwd=get_cwd(), text=True, universal_newlines=True)

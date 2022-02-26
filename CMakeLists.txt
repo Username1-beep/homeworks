@@ -1,10 +1,9 @@
-#To choose 'easy' version of homework you should remove '#' on the second line and remove the    third line at all
+#To choose 'easy' version of homework you should remove '#' on the second line and remove the third line at all
 #set(RUN_MODE "easy")
 set(RUN_MODE "hard")
 
-
 cmake_minimum_required(VERSION 3.9)
-project(number-trie)
+project(phone-book)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -14,16 +13,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -pedantic")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=undefined,address,leak -fno-sanitize-recover=all -D_GLIBCXX_DEBUG")
 
 
-set(SOURCES number/number.cpp)
-set(HEADERS number/number.h)
-set(TESTS number/number-test.cpp)
+set(SOURCES phone-book.cpp)
+set(HEADERS phone-book.h utils.h)
 
+
+set(TESTS main-easy.cpp)
 if ("${RUN_MODE}" STREQUAL "hard")
-	set(SOURCES ${SOURCES} trie/trie.cpp trie/trie-naive.cpp)
-	set(HEADERS ${HEADERS} trie/trie.h trie/trie-naive.h)
-	set(TESTS ${TESTS} trie/trie-test.cpp)
-endif()
+	list(APPEND TESTS "main-hard.cpp")
+endif ()
 
-
-add_executable(public-tests ${SOURCES} ${HEADERS} ${TESTS})
-target_link_libraries(public-tests gtest_main)
+add_executable(tests ${SOURCES} ${HEADERS} ${TESTS})
+target_link_libraries(tests gtest_main)
